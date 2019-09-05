@@ -34,4 +34,4 @@ def generate_spin_matrix(side):
      return matrix
 
 if __name__ == "__main__":
-    print(generate_spin_matrix(5)
+    print(generate_spin_matrix(5))
