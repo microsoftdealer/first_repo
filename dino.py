@@ -2,7 +2,10 @@ import sys
 
 dino_park = {'din1': {'gemph': 30, 'cost': 500, 'quantity': 0},
              'din2': {'gemph': 220, 'cost': 3000, 'quantity': 0},
-             'din3': {'gemph': 1700, 'cost': 20000, 'quantity': 0}}
+             'din3': {'gemph': 1700, 'cost': 20000, 'quantity': 0},
+             'din4': {'gemph': 15000, 'cost': 150000, 'quantity': 0},
+             'din5': {'gemph': 45000, 'cost': 400000, 'quantity': 0},
+             'din6': {'gemph': 125000, 'cost': 1000000, 'quantity': 0}}
 bonus = 50
 gem_salary = 0
 balance = 500
@@ -10,6 +13,7 @@ real_balance = 0
 gem_balance = 0
 cash = {'USD': 0, 'RUR': 0}
 period = int(sys.argv[1])
+waiter = 0
 
 def buy_dino(dino_type):
     global dino_park
@@ -41,18 +45,25 @@ def count_cash(real_balance):
 
 def return_best_offer(balance):
     global dino_park
+    global gem_salary
     best = False
     for key, values in dino_park.items():
         if dino_park[key]['cost'] < balance:
             best = key
+        elif gem_salary * 24 / 15 > dino_park[key]['cost']:
+            best = False
         else:
             return best
+    return best
 
 def count_for_period(days):
     global gem_balance
     global balance
     global bonus
     global gem_salary
+    passed = 0
+    din3_avail = True
+    din2_avail = True
     for day in range(days):
         balance += bonus
         gem_balance += 24 * gem_salary
