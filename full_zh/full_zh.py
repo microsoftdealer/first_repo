@@ -2,9 +2,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from math import pi
 import datetime
+import sys
 
-mydate = datetime.datetime.now()
-date = mydate.strftime("%G_%B")
+if len(sys.argv) > 2:
+    mydate = datetime.datetime.now()
+    date = mydate.strftime("%G_%B")
+else:
+    date = sys.argv[1]
 
 love = int(input('Put love: '))
 money = int(input('Put money: '))
