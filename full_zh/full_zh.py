@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from math import pi
+import datetime
+
+mydate = datetime.datetime.now()
+date = mydate.strftime("%G_%B")
 
 love = int(input('Put love: '))
 money = int(input('Put money: '))
@@ -8,7 +12,6 @@ hobby = int(input('Put hobby: '))
 friends = int(input('Put friends: '))
 health = int(input('Put health: '))
 job = int(input('And job, finally: '))
-month = input('It was not the last. Put the month: ')
 # Set data
 df = pd.DataFrame({
     'group': ['A'],
@@ -54,11 +57,11 @@ plt.ylim(0, 10)
 # Ind1
 values = df.loc[0].drop('group').values.flatten().tolist()
 values += values[:1]
-ax.plot(angles, values, linewidth=1, linestyle='solid', label=month)
+ax.plot(angles, values, linewidth=1, linestyle='solid', label=date[5:])
 ax.fill(angles, values, 'b', alpha=0.1)
 
 # Add legend
 plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
 
-name = month + '_polnaya_zh.png'
+name = date + '_polnaya_zh.png'
 fig.savefig(name)
