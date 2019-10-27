@@ -2,12 +2,13 @@ import subprocess
 import os
 
 class GitRep:
-    def __init__(self, local=False, remote=False):
-        self.rep = local
-        if remote:
+    def __init__(self, local=False, clone=False):
+        work_path = os.getcwd()
+        if clone:
             self.rep = self._initRemote(remote)
         elif local:
             self.rep = self._initLocal(local)
+        os.chdir(work_path)
 
     def _initLocal(self, localrep_name): 
         if not os.path.exists(localrep_name):
@@ -18,8 +19,8 @@ class GitRep:
                 print(result.stdout.decode('utf-8'))
             else:
                 print(result.stderr.decode('utf-8'))
-        else:
-            raise ValueError(rep_name + ' dir already exists')
+        elif not os.path.exists(localrep_name + '/.git'):
+            raise ValueError('Ooops.' + localrep_name + ' already exists and it is not repo')
         self.rep_path = os.getcwd()
 
     def _initRemote(self, remrep_link):
@@ -38,13 +39,13 @@ class GitRep:
         if os.getcwd() != self.rep_path:
             work_path = os.getcwd()
         else:
-            work_path = rep_path
+            work_path = self.rep_path
         os.chdir(self.rep_path)
         result = subprocess.run(['git', 'status'], stdout=subprocess.PIPE)
         print(result.stdout)
         if result.returncode == 0:
             os.chdir(work_path)
-            return result.stdout
+            return result.stdout.decode('utf-8')
         else:
             os.chdir(work_path)
             raise ValueError('Something is wrong. Reinit class')
@@ -53,7 +54,7 @@ class GitRep:
         if os.getcwd() != self.rep_path:
             work_path = os.getcwd()
         else:
-            work_path = rep_path
+            work_path = self.rep_path
         os.chdir(self.rep_path)
         result = subprocess.run(['git', 'checkout', branch_name], stdout=subprocess.PIPE)
         print(result.stdout)
@@ -69,10 +70,10 @@ class GitRep:
         if os.getcwd() != self.rep_path:
             work_path = os.getcwd()
         else:
-            work_path = rep_path
+            work_path = self.rep_path
         os.chdir(self.rep_path)
         result = subprocess.run(['git', 'branch', branch_name], stdout=subprocess.PIPE)
-        print(result.stdout)
+        print(result.stdout.decode('utf-8'))
         if result.returncode == 0:
             os.chdir(work_path)
             return result.stdout
@@ -84,14 +85,14 @@ class GitRep:
         if os.getcwd() != self.rep_path:
             work_path = os.getcwd()
         else:
-            work_path = rep_path
+            work_path = self.rep_path
         os.chdir(self.rep_path)
         subprocess.run(['git', 'add', '.'])
         result = subprocess.run(['git', 'commit', '-m', commit_message], stdout=subprocess.PIPE)
         print(result.stdout)
         if result.returncode == 0:
             os.chdir(work_path)
-            return result.stdout
+            return result.stdout.decode('utf-8')
         else:
             os.chdir(work_path)
             raise ValueError('Something is wrong. Reinit class')
@@ -100,14 +101,13 @@ class GitRep:
         if os.getcwd() != self.rep_path:
             work_path = os.getcwd()
         else:
-            work_path = rep_path
+            work_path = self.rep_path
         os.chdir(self.rep_path)
         result = subprocess.run(['git', 'push'], stdout=subprocess.PIPE)
-        print(result.stdout)
+        print(result.stdout.decode('utf-8'))
         if result.returncode == 0:
             os.chdir(work_path)
             return result.stdout
         else:
             os.chdir(work_path)
             raise ValueError('Something is wrong. Reinit class')
-
