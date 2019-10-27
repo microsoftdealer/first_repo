@@ -1,8 +1,9 @@
 import subprocess
+import os
 
 class GitRep:
     def __init__(self, local=False, remote=False):
-        self.rep = rep_name
+        self.rep = local
         if remote:
             self.rep = self._initRemote(remote)
         elif local:
@@ -24,7 +25,7 @@ class GitRep:
     def _initRemote(self, remrep_link):
         result = subprocess.run(['git', 'clone', remrep_link], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode ==0:
-            rep_init_out = result.stdout.decode('utf-8'))
+            rep_init_out = result.stdout.decode('utf-8')
             print(rep_init_out)
             rel_rep_path = rep_init_out.split("'")[1]
             os.chdir(rel_rep_path)
