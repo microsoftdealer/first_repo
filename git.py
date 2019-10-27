@@ -21,6 +21,8 @@ class GitRep:
                 print(result.stderr.decode('utf-8'))
         elif not os.path.exists(localrep_name + '/.git'):
             raise ValueError('Ooops.' + localrep_name + ' already exists and it is not repo')
+        else:
+            os.chdir(localrep_name)
         self.rep_path = os.getcwd()
 
     def _initRemote(self, remrep_link):
@@ -42,7 +44,6 @@ class GitRep:
             work_path = self.rep_path
         os.chdir(self.rep_path)
         result = subprocess.run(['git', 'status'], stdout=subprocess.PIPE)
-        print(result.stdout)
         if result.returncode == 0:
             os.chdir(work_path)
             return result.stdout.decode('utf-8')
@@ -57,10 +58,10 @@ class GitRep:
             work_path = self.rep_path
         os.chdir(self.rep_path)
         result = subprocess.run(['git', 'checkout', branch_name], stdout=subprocess.PIPE)
-        print(result.stdout)
+        print(result.stdout.decode('utf-8'))
         if result.returncode == 0:
             os.chdir(work_path)
-            return result.stdout
+            return result.stdout.decode('utf-8')
         else:
             os.chdir(work_path)
             raise ValueError('Something is wrong. Reinit class')
