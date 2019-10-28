@@ -1,14 +1,16 @@
 import subprocess
 import os
+import re
 
 class GitRep:
     def __init__(self, local=False, clone=False):
         work_path = os.getcwd()
         if clone:
-            self.rep = self._initRemote(remote)
+            self._initRemote(clone)
         elif local:
-            self.rep = self._initLocal(local)
+            self._initLocal(local)
         os.chdir(work_path)
+        self._parse_status()
 
     def _initLocal(self, localrep_name): 
         if not os.path.exists(localrep_name):
@@ -27,8 +29,8 @@ class GitRep:
 
     def _initRemote(self, remrep_link):
         result = subprocess.run(['git', 'clone', remrep_link], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if result.returncode ==0:
-            rep_init_out = result.stdout.decode('utf-8')
+        if result.returncode == 0:
+            rep_init_out = result.stderr.decode('utf-8')
             print(rep_init_out)
             rel_rep_path = rep_init_out.split("'")[1]
             os.chdir(rel_rep_path)
@@ -36,6 +38,19 @@ class GitRep:
         else:
             raise ValueError(remrep_link + 'looks wrong, try to fix link or install ssh key. \n The error is: \n' + result.stderr.decode('utf-8'))
 
+
+    def _parse_status(self):
+        status = self.git_status()
+        self.cur_branch = re.findall('On branch (\S+)', status)
+        self.new_files = re.findall('new files:\s+(\S+)', status)
+        self.mod_files = re.findall('modified:\s+(\S+)', status)
+        self.del_files = re.findall('deleted:\s+(\S+)', status)
+        untrack_files = re.search('Untracked files:\s+.+(?:\s+(\S+))*', status)
+        if untrack_files:
+            self.untracked_files = re.findall(r'\t(\S+)', untrack_files.group())
+        else:
+            self.untracked_files = []
+        
 
     def git_status(self):
         if os.getcwd() != self.rep_path:
@@ -61,6 +76,7 @@ class GitRep:
         print(result.stdout.decode('utf-8'))
         if result.returncode == 0:
             os.chdir(work_path)
+            self._parse_status()
             return result.stdout.decode('utf-8')
         else:
             os.chdir(work_path)
@@ -76,6 +92,7 @@ class GitRep:
         result = subprocess.run(['git', 'branch', branch_name], stdout=subprocess.PIPE)
         print(result.stdout.decode('utf-8'))
         if result.returncode == 0:
+            self._parse_status()
             os.chdir(work_path)
             return result.stdout
         else:
@@ -90,13 +107,14 @@ class GitRep:
         os.chdir(self.rep_path)
         subprocess.run(['git', 'add', '.'])
         result = subprocess.run(['git', 'commit', '-m', commit_message], stdout=subprocess.PIPE)
-        print(result.stdout)
+        print(result.stdout.decode('utf-8'))
         if result.returncode == 0:
+            self._parse_status()
             os.chdir(work_path)
             return result.stdout.decode('utf-8')
         else:
             os.chdir(work_path)
-            raise ValueError('Something is wrong. Reinit class')
+            raise ValueError('Something is wrong. Resolve the issues')
 
     def git_push(self):
         if os.getcwd() != self.rep_path:
@@ -108,7 +126,8 @@ class GitRep:
         print(result.stdout.decode('utf-8'))
         if result.returncode == 0:
             os.chdir(work_path)
+            self._parse_status()
             return result.stdout
         else:
             os.chdir(work_path)
-            raise ValueError('Something is wrong. Reinit class')
+            raise ValueError('Something is wrong. Resolve the issues')
