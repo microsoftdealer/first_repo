@@ -40,6 +40,10 @@ class GitRep:
 
 
     def _parse_status(self):
+        self.new_files = []
+        self.mod_files = []
+        self.del_files = []
+        self.untracked_files = []
         status = self.git_status()
         self.cur_branch = re.findall('On branch (\S+)', status)
         self.new_files = re.findall('new files:\s+(\S+)', status)
@@ -48,9 +52,7 @@ class GitRep:
         untrack_files = re.search('Untracked files:\s+.+(?:\s+(\S+))*', status)
         if untrack_files:
             self.untracked_files = re.findall(r'\t(\S+)', untrack_files.group())
-        else:
-            self.untracked_files = []
-        
+
 
     def git_status(self):
         if os.getcwd() != self.rep_path:
