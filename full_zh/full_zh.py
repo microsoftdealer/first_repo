@@ -4,7 +4,7 @@ from math import pi
 import datetime
 import sys
 
-if len(sys.argv) > 2:
+if len(sys.argv) < 2:
     mydate = datetime.datetime.now()
     date = mydate.strftime("%G_%B")
 else:
