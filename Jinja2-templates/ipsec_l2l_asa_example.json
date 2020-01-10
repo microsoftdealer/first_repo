@@ -1,0 +1,17 @@
+{
+  "src_addr": "82.112.185.172",
+  "dst_addr": "94.26.185.25",
+  "dest_net": [
+    "net": "192.168.5.0",
+	"mask": "255.255.255.0"
+  ],
+  "src_net": [
+    "net": "10.0.0.0",
+	"mask": "255.0.0.0"
+  ],
+  "tun_psk": "z78573Z%925$",
+  "login": "kraud",
+  "password": "3gg5jVWfxoToMB7ONpqW",
+  "cyptomap_num": "1",
+  "trans_set": "ESP-AES-256-SHA"
+}

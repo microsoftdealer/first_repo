@@ -1,0 +1,25 @@
+{% for object in dest_net %}
+object network NETWORK_OBJ_{{ object.net }}
+  subnet {{ object.net }} {{ object.mask }}
+{% endfor %}
+{% for object in src_net %}
+object network NETWORK_OBJ_{{ object.net }}
+  subnet {{ object.net }} {{ object.mask }}
+{% endfor %}
+{% for src, dst in src_net|zip(dest_net) %}
+access-list outside_cryptomap_{{ cyptomap_num }} line 1 extended permit ip {{ src.net }} {{ src.mask }} {{ dst.net }} {{ dst.mask }}
+nat (inside,outside) source static NETWORK_OBJ_{{ src.net }} NETWORK_OBJ_{{ src.net }} destination static NETWORK_OBJ_{{ dst.net }} NETWORK_OBJ_{{ dst.net }} no-proxy-arp route-lookup
+{% endfor %} 
+group-policy GroupPolicy_{{ dst_addr }} internal
+group-policy GroupPolicy_{{ dst_addr }} attributes
+  vpn-tunnel-protocol ikev1
+exit
+tunnel-group {{ dst_addr }} type ipsec-l2l
+tunnel-group {{ dst_addr }} general-attributes
+  default-group-policy GroupPolicy_{{ dst_addr }}
+tunnel-group {{ dst_addr }} ipsec-attributes
+  ikev1 pre-shared-key {{ tun_psk }}
+  isakmp keepalive threshold 10 retry 2
+crypto map outside_map 2 match address outside_cryptomap_{{ cyptomap_num }}
+crypto map outside_map 2 set  peer  {{ dst_addr }}
+crypto map outside_map 2 set  ikev1 transform-set  {{ trans_set }}
