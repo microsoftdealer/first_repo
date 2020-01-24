@@ -3,6 +3,9 @@ import datetime
 import time
 from sys import argv
 import csv
+from itertools import repeat
+from concurrent.futures import ThreadPoolExecutor
+
 try:
     output = argv[1]
 except IndexError:
@@ -13,7 +16,8 @@ hosts = []
 
 while True:
     input1, input2 = '', ''
-    input1 = input('Please, put IP address to count statistics(leave clear to close list for checks): ')
+    input1 = input(
+            'Please, put IP address to count statistics(leave clear to close list for checks): ')
     if input1:
         input2 = input('Now put hostname: ')
     if input1 and input2:
@@ -31,6 +35,9 @@ out_data = [['time'],]
 for host in hosts:
     out_data[0].append(host)
 
+'''
+Just to re/create file with output
+'''
 with open(output, 'w') as f:
     writer = csv.writer(f)
     for row in out_data:
@@ -48,10 +55,17 @@ def count_avg_float(start, last, num_of_pings):
     return res
 
 
+def pinger(ip_addr, cnt=1):
+    result = ping(ip_addr, size=40, count=cnt)
+    return result
+
 while overall_count < 15000:
         response_list = []
-        for ip in ip_addresses:
-            response_list.append(ping(ip, size=40, count=1))
+        workers = len(ip_addresses)
+        with ThreadPoolExecutor(max_workers=workers) as exe:
+            result = exe.map(pinger, ip_addresses)
+            for res in result:
+                response_list.append(res)
         today = datetime.datetime.today()
         inter_list = [today.strftime("%d.%m.%Y %H:%M:%S")]
         for resp in response_list:
