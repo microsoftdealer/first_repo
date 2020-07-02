@@ -1,0 +1,162 @@
+!
+prefix-list LOCAL_ROUTES_OUT seq 10 permit 10.7.160.0/22
+prefix-list LOCAL_ROUTES_OUT seq 20 permit 172.30.12.0/24
+prefix-list LOCAL_ROUTES_OUT seq 30 permit 192.168.12.0/24
+prefix-list LOCAL_ROUTES_OUT seq 40 permit 10.7.166.0/24
+prefix-list LOCAL_ROUTES_OUT seq 50 permit 10.7.212.0/24
+prefix-list LOCAL_ROUTES_OUT seq 60 permit 10.7.172.0/24
+prefix-list LOCAL_ROUTES_OUT seq 70 permit 10.7.176.0/24
+prefix-list LOCAL_ROUTES_OUT seq 80 permit 10.7.174.0/24
+prefix-list LOCAL_ROUTES_OUT seq 90 permit 172.30.124.0/24
+!
+prefix-list S2SVPN_ROUTES_IN seq 10 permit 172.21.251.0/29
+prefix-list S2SVPN_ROUTES_IN seq 20 permit 172.21.251.8/29
+prefix-list S2SVPN_ROUTES_IN seq 30 permit 172.21.251.16/29
+prefix-list S2SVPN_ROUTES_IN seq 40 permit 172.21.251.24/29
+prefix-list S2SVPN_ROUTES_IN seq 50 permit 172.21.251.32/29
+!
+prefix-list S2SVPN_ROUTES_OUT seq 10 deny 0.0.0.0/0 le 32
+!
+!
+object network LAN_Net
+ subnet 10.7.160.0 255.255.255.0
+object network MGMT_Net
+ subnet 172.21.251.24 255.255.255.248
+object network LAN-DMZ_Net
+ subnet 172.21.251.0 255.255.255.248
+object network VOICE_Net
+ subnet 172.21.251.32 255.255.255.248
+object network LAN-WMS_Net
+ subnet 172.21.251.8 255.255.255.248
+object network MGMT-WMS_Net
+ subnet 172.21.251.24 255.255.255.248
+object network LAN-IND_Net
+ subnet 172.21.251.0 255.255.255.248
+object network DMZ-IND_Net
+ subnet 172.21.251.32 255.255.255.248
+object network VPNUsers_Net
+ subnet 172.21.251.8 255.255.255.248
+!
+object-group network RU12_Nets
+ network-object object LAN_Net
+ network-object object MGMT_Net
+ network-object object LAN-DMZ_Net
+ network-object object VOICE_Net
+ network-object object LAN-WMS_Net
+ network-object object MGMT-WMS_Net
+ network-object object LAN-IND_Net
+ network-object object DMZ-IND_Net
+ network-object object VPNUsers_Net
+
+!
+route Null0 10.7.212.0 255.255.255.0 
+!
+object network RU11_MTS_Net
+ subnet 172.21.251.16 255.255.255.248
+object network RU12_MTS_Net
+ subnet 172.21.251.24 255.255.255.248
+object network RU13_MTS_Net
+ subnet 172.21.251.0 255.255.255.248
+object network RU16_MTS_Net
+ subnet 172.21.251.32 255.255.255.248
+object network RU17_MTS_Net
+ subnet 172.21.251.8 255.255.255.248
+!
+object-group network MTS_L3VPN_Nets
+ network-object object RU11_MTS_Net
+ network-object object RU12_MTS_Net
+ network-object object RU13_MTS_Net
+ network-object object RU16_MTS_Net
+ network-object object RU17_MTS_Net
+!
+!
+router bgp 65503
+ bgp log-neighbor-changes
+ bgp graceful-restart
+ timers bgp 5 15 15
+ address-family ipv4 unicast
+  neighbor 10.254.1.9 remote-as 65500
+  neighbor 10.254.1.9 activate
+  neighbor 10.254.1.9 route-map LOCAL_ROUTES_OUT out
+  neighbor 10.255.1.9 remote-as 65500
+  neighbor 10.255.1.9 activate
+  neighbor 10.255.1.9 weight 100
+  neighbor 10.255.1.9 route-map LOCAL_ROUTES_OUT out
+  neighbor 10.254.1.21 remote-as 65501
+  neighbor 10.254.1.21 activate
+  neighbor 10.254.1.21 route-map LOCAL_ROUTES_OUT out
+  neighbor 10.255.1.21 remote-as 65501
+  neighbor 10.255.1.21 activate
+  neighbor 10.255.1.21 weight 100
+  neighbor 10.255.1.21 route-map LOCAL_ROUTES_OUT out
+  neighbor 172.21.251.25 remote-as 8359
+  neighbor 172.21.251.25 activate
+  neighbor 172.21.251.25 route-map S2SVPN_ROUTES_IN in
+  neighbor 172.21.251.25 route-map S2SVPN_ROUTES_OUT out
+  neighbor 10.254.1.29 remote-as 65502
+  neighbor 10.254.1.29 activate
+  neighbor 10.254.1.29 route-map LOCAL_ROUTES_OUT out
+  neighbor 10.255.1.29 remote-as 65502
+  neighbor 10.255.1.29 activate
+  neighbor 10.255.1.29 weight 100
+  neighbor 10.255.1.29 route-map LOCAL_ROUTES_OUT out
+  neighbor 10.254.1.38 remote-as 65504
+  neighbor 10.254.1.38 activate
+  neighbor 10.254.1.38 route-map LOCAL_ROUTES_OUT out
+  neighbor 10.255.1.38 remote-as 65504
+  neighbor 10.255.1.38 activate
+  neighbor 10.255.1.38 weight 100
+  neighbor 10.255.1.38 route-map LOCAL_ROUTES_OUT out
+  network 172.30.12.0 mask 255.255.255.0
+  network 10.7.160.0 mask 255.255.252.0
+  no auto-summary
+  no synchronization
+ exit-address-family
+!
+!
+tunnel-group 172.21.251.34 type ipsec-l2l
+tunnel-group 172.21.251.34 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+tunnel-group 172.21.251.2 type ipsec-l2l
+tunnel-group 172.21.251.2 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+tunnel-group 172.21.251.10 type ipsec-l2l
+tunnel-group 172.21.251.10 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+tunnel-group 172.21.251.18 type ipsec-l2l
+tunnel-group 172.21.251.18 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+tunnel-group 84.204.166.51 type ipsec-l2l
+tunnel-group 84.204.166.51 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+tunnel-group 109.195.49.113 type ipsec-l2l
+tunnel-group 109.195.49.113 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+tunnel-group 109.195.129.181 type ipsec-l2l
+tunnel-group 109.195.129.181 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+tunnel-group 87.255.18.241 type ipsec-l2l
+tunnel-group 87.255.18.241 ipsec-attributes
+ ikev2 remote-authentication pre-shared-key *****
+ ikev2 local-authentication pre-shared-key *****
+
+
+Weight
+Local Pref
+LocalOrigin
+AccumulatedIGP??
+AS_PATH
+OriginType???
+eBgp>iBGP
+LowIGPNextHop
+Oldest_eBGP
+Lowest_adv_neighborRID
+MinClustListLength
+LowNeighAddress

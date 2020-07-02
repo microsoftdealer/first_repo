@@ -28,10 +28,50 @@ def make_dev_jobs(dev):
     config += prepare_networks()
 
 
-def get_dev_config(dev):
+def get_dev_config(ip, pw, username):
+    conn = Netmiko(host=ip, username=admin, password=pw, device_type='cisco_asa')
+    obj_gr = conn.send_command('show runn object-g network', use_textfsm=True)
+    obj_net = conn.send_command('show runn object network', use_textfsm=True)
+    res = (obj_gr, obj_net)
+    return res
 
 
-def remove_extra_objects(new_obj, old_obj):
+def remove_extra_nets(new_obj, old_obj):
+    clear_list = []
+    fin_list = []
+    for elem, num in zip(new_obj, range(0, len(new_obj))):
+        mark = False
+        marked_obj_name = False
+        inter_elem = False
+        for obj in old_obj:
+            if elem[0] in obj['network']:
+                mark = True
+                marked_obj_name = obj['name']
+                inter_elem = (elem
+            else:
+                pass
+        if mark:
+            clear_list.append(inter_elem)
+        else:
+            fin_list.append(elem)
+    return (clear_list, fin_list)
+
+
+def remove_extra_hosts(new_obj, old_obj):
+    clear_list = []
+    fin_list = []
+    for elem, num in zip(new_obj, range(0, len(new_obj))):
+        mark = False
+        for obj in old_obj:
+            if elem[0] in obj['host']:
+                mark = True
+            else:
+                pass
+        if mark:
+            clear_list.append(elem)
+        else:
+            fin_list.append(elem)
+    return (clear_list, fin_list)
 
 
 def prepare_networks(nets_list):
