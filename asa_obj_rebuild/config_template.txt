@@ -1,0 +1,6 @@
+{% for ob_gr in obj_group %}
+object-group network {{ ob_gr.name }}
+{%for ob in ob_gr.objects %}
+network-object object {{ ob }}
+{% endfor %}
+{% endfor %}
