@@ -43,12 +43,13 @@ def get_obj_name(obj, current_objects):
     for curr_obj in current_objects:
         if curr_obj['type'] == 'subnet':
             if curr_obj['network'] == obj[1] and curr_obj['mask'] == obj[2]:
-                check = input("We've decide to choose name for your network - " + curr_obj['name'] + ' but you may put another one: ')
+                check = input("We've decide to choose name for your network " + obj[1] + '/' + obj[2] + ' - ' + curr_obj['name'] + ' but you may put another one: ')
                 if check:
                     curr_obj['name'] = check
                 return curr_obj['name']
         elif curr_obj['type'] == 'host':
             if curr_obj['host'] == obj[1]:
+                check = input("We've decide to choose name for your host " + obj[1] + ' - ' + curr_obj['name'] + ' but you may put another one: ')
                 return curr_obj['name']
     name = None
     return name
@@ -175,7 +176,7 @@ if __name__ == "__main__":
     fw_list = return_fw_list(fw_list_file)
     for fw in fw_list:
         print('Working with FW ' + fw['host'] + '\n')
-        conn = get_Netmiko(fw:
+        conn = get_Netmiko(fw)
         print('Getting objects lists and object groups...\n')
         object_groups, objects = get_objects(conn)
         obj_host_list = get_unknown_hosts(object_groups, objects)
